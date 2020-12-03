@@ -1,0 +1,514 @@
+---
+title: "Westlake Stats"
+author: "Charl Everts"
+date: "28/07/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+The data captured represents scores from 28 rounds played by Charl Everts at Westlake Golf Club. Scores are recorded from 2018 until present. As new rounds are recoreded, the scores are captured in the Westlake.xlsx file and read into R to update the data visualisations. The goal of this project is to identify trends and potential weaknesses in the user's scoring at Westlake, based on **Score, GIR and Putts per round.**
+
+### Distribution of data
+
+The following 5 graphs illustrate the distribution of:
+
+- Front 9 scoring
+- Back 9 scoring
+- Gross scores
+- GIR per round
+- Putts per round
+
+The graphs are followed by the *Six Number Summary* for each variable.
+
+```{r, include = FALSE}
+rm(list=ls())
+library('rmarkdown')
+setwd("C:/Users/user/Desktop/FinTech 2020")
+
+# xls file
+library(readxl)
+library(ggplot2)
+stats <- read_excel("Westlake.xlsx", sheet = "Tibble")
+str(stats)
+stats$`Front 9` <- as.integer(stats$`Front 9`)
+stats$`Back 9` <- as.integer(stats$`Back 9`)
+stats$`11`[21] <- 2
+stats$`11`
+colnames(stats)[which(names(stats) == "putts")] <- "Putts"
+str(stats)
+```
+
+
+
+```{r, echo = FALSE, warning = FALSE}
+library(ggplot2)
+library(grid)
+library(gridExtra)
+
+# Front 9 histogram
+F9 <- ggplot(stats, aes(x = `Front 9`)) + 
+  geom_histogram(aes(y = ..density..), binwidth = 1, 
+                 colour = "black", fill = "white") +
+  geom_density(alpha = .2, fill = "#33CCFF") + 
+  geom_vline(aes(xintercept = mean(na.omit(`Front 9`))),
+             color = "deeppink", linetype = "dashed", size = 1) +
+  scale_x_continuous(breaks = seq(32, 45, 1)) +
+  ggtitle("Distribution of Front 9 scoring") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Back 9 histogram
+B9 <- ggplot(stats, aes(x = `Back 9`)) + 
+  geom_histogram(aes(y = ..density..), binwidth = 1, 
+                 colour = "black", fill = "white") +
+  geom_density(alpha = .2, fill = "#33CCFF") + 
+  geom_vline(aes(xintercept = mean(na.omit(`Back 9`))),
+             color = "deeppink", linetype = "dashed", size = 1) +
+  scale_x_continuous(breaks = seq(32, 45, 1)) +
+  ggtitle("Distribution of Back 9 scoring") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+
+```{r fig1, fig.height = 5, fig.width = 6, fig.align = "center", echo = FALSE}
+F9
+summary(stats$`Front 9`)
+```
+
+
+
+```{r fig2, fig.height = 5, fig.width = 6, fig.align = "center", echo = FALSE}
+B9
+summary(stats$`Back 9`)
+```
+
+
+
+```{r fig3, fig.height = 5, fig.width = 6, fig.align = "center", echo = FALSE}
+# Gross histogram
+Gross <- ggplot(stats, aes(x = Gross)) + 
+  geom_histogram(aes(y = ..density..), binwidth = 1, 
+                 colour = "black", fill = "white") +
+  geom_density(alpha = .2, fill = "#33CCFF") + 
+  geom_vline(aes(xintercept = mean(`Gross`)),
+             color = "deeppink", linetype = "dashed", size = 1) +
+  scale_x_continuous(breaks = seq(68, 85, 1)) +
+  ggtitle("Distribution of Scores") +
+  theme(plot.title = element_text(hjust = 0.5))
+Gross
+summary(stats$Gross)
+```
+
+
+
+```{r fig4, fig.height = 5, fig.width = 6, fig.align = "center", echo = FALSE}
+# GIR histogram
+GIR <- ggplot(stats, aes(x = GIR)) + 
+  geom_histogram(aes(y = ..density..), binwidth = 1, 
+                 colour = "black", fill = "white") +
+  geom_density(alpha = .2, fill = "#33CCFF") + 
+  geom_vline(aes(xintercept = mean(GIR)),
+             color = "deeppink", linetype = "dashed", size = 1) +
+  scale_x_continuous(breaks = seq(5, 18, 1)) +
+  ggtitle("Distribution of GIR per round") +
+  theme(plot.title = element_text(hjust = 0.5))
+GIR
+summary(stats$GIR)
+```
+
+
+
+```{r fig5, fig.height = 5, fig.width = 6, fig.align = "center", echo = FALSE}
+# Putts histogram
+Putts <- ggplot(stats, aes(x = Putts)) + 
+  geom_histogram(aes(y = ..density..), binwidth = 1, 
+                 colour = "black", fill = "white") +
+  geom_density(alpha = .2, fill = "#33CCFF") + 
+  geom_vline(aes(xintercept = mean(Putts)),
+             color = "deeppink", linetype = "dashed", size = 1) +
+  scale_x_continuous(breaks = seq(20, 42, 1)) +
+  ggtitle("Distribution of Putts per round") +
+  theme(plot.title = element_text(hjust = 0.5))
+Putts
+summary(stats$Putts)
+```
+
+
+
+```{r, include = FALSE}
+# First Hole histogram
+one <- ggplot(stats, aes(x = `1`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#FF0000") +
+  geom_vline(aes(xintercept = mean(`1`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+one
+summary(stats$`1`)
+
+# Second Hole histogram
+two <- ggplot(stats, aes(x = `2`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#FF3333") +
+  geom_vline(aes(xintercept = mean(`2`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+two
+summary(stats$`2`)
+
+# Third Hole histogram
+three <- ggplot(stats, aes(x = `3`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#FF6666") +
+  geom_vline(aes(xintercept = mean(`3`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+three
+summary(stats$`3`)
+
+# Fourth Hole histogram
+four <- ggplot(stats, aes(x = `4`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#FF3300") +
+  geom_vline(aes(xintercept = mean(`4`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+four
+summary(stats$`4`)
+
+# Fifth Hole histogram
+five <- ggplot(stats, aes(x = `5`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#FF6600") +
+  geom_vline(aes(xintercept = mean(`5`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+five
+summary(stats$`5`)
+
+# Sixth Hole histogram
+six <- ggplot(stats, aes(x = `6`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#FF9900") +
+  geom_vline(aes(xintercept = mean(`6`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+six
+summary(stats$`6`)
+
+# Seven Hole histogram
+seven <- ggplot(stats, aes(x = `7`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#FFCC00") +
+  geom_vline(aes(xintercept = mean(`7`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+seven
+summary(stats$`7`)
+
+# Eighth Hole histogram
+eight <- ggplot(stats, aes(x = `8`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#FFFF00") +
+  geom_vline(aes(xintercept = mean(`8`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+eight
+summary(stats$`8`)
+
+# Ninth Hole histogram
+nine <- ggplot(stats, aes(x = `9`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#FFFF66") +
+  geom_vline(aes(xintercept = mean(`9`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 25, 2))
+nine
+summary(stats$`9`)
+```
+
+### Hole By Hole Scoring
+
+Each of the 18 histogram graphs detail the frequency of scores on each hole. The mean score relative to par on each hole is marked by a dashed vertical line. The designations (x-axis) have the following meanings:
+
+- -2: eagle
+- -1: birdie
+- 0: par
+- 1: bogey
+- 2: double bogey
+
+```{r fig6, fig.height = 2, fig.width = 6, fig.align = "center", echo = FALSE}
+grid.arrange(grobs = list(one, two, three), 
+             nrow = 1, main = "Front Nine")
+grid.arrange(grobs = list(four, five, six), 
+             nrow = 1, main = "Front Nine")
+grid.arrange(grobs = list(seven, eight, nine), 
+             nrow = 1, main = "Front Nine")
+```
+
+
+```{r, include = FALSE}
+# Tenth Hole histogram
+ten <- ggplot(stats, aes(x = `10`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#CCFF00") +
+  geom_vline(aes(xintercept = mean(`10`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+ten
+summary(stats$`10`)
+
+# Eleventh Hole histogram
+eleven <- ggplot(stats, aes(x = `11`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#99FF33") +
+  geom_vline(aes(xintercept = mean(`11`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+eleven
+summary(stats$`11`)
+
+# Twelfth Hole histogram
+twelve <- ggplot(stats, aes(x = `12`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#00FF00") +
+  geom_vline(aes(xintercept = mean(`12`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+twelve
+summary(stats$`12`)
+
+# Thirteenth Hole histogram
+thirteen <- ggplot(stats, aes(x = `13`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#66FFCC") +
+  geom_vline(aes(xintercept = mean(`13`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+thirteen
+summary(stats$`13`)
+
+# Fourteenth Hole histogram
+fourteen <- ggplot(stats, aes(x = `14`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#66FFFF") +
+  geom_vline(aes(xintercept = mean(`14`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+fourteen
+summary(stats$`14`)
+
+# Fifteenth Hole histogram
+fifteen <- ggplot(stats, aes(x = `15`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#00FFFF") +
+  geom_vline(aes(xintercept = mean(`15`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+fifteen
+summary(stats$`15`)
+
+# Sixteenth Hole histogram
+sixteen <- ggplot(stats, aes(x = `16`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#33CCFF") +
+  geom_vline(aes(xintercept = mean(`16`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+sixteen
+summary(stats$`16`)
+
+# Seventeenth Hole histogram
+seventeen <- ggplot(stats, aes(x = `17`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#0066FF") +
+  geom_vline(aes(xintercept = mean(`17`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+seventeen
+summary(stats$`17`)
+
+# Eighteenth Hole histogram
+eighteen <- ggplot(stats, aes(x = `18`)) + 
+  geom_histogram(binwidth = 1, 
+                 colour = "black", alpha = 0.5, fill = "#0000FF") +
+  geom_vline(aes(xintercept = mean(`18`)),
+             color = "black", linetype = "dashed", size = 1) +
+  scale_y_continuous(breaks = seq(0, 20, 2))
+eighteen
+summary(stats$`18`)
+```
+
+
+```{r fig7, fig.height = 2, fig.width = 6, fig.align = "center", echo = FALSE}
+grid.arrange(grobs = list(ten, eleven, twelve), 
+             nrow = 1, main = "Back Nine")
+grid.arrange(grobs = list(thirteen, fourteen, fifteen), 
+             nrow = 1, main = "Back Nine")
+grid.arrange(grobs = list(sixteen, seventeen, eighteen), 
+             nrow = 1, main = "Back Nine")
+```
+
+
+### The effect of GIR per round on Scoring
+A **weak negative** relationship exists between GIR and Score. This is expected, since an increase in GIR hit generally leads to lower scoring, and vice versa.
+
+```{r fig8, fig.height = 5, fig.width = 8, fig.align = "center", echo = FALSE, message = FALSE}
+p <- ggplot(stats, aes(GIR, Gross))
+p + geom_point(colour = "black", size = 3) +
+  scale_x_continuous(breaks = seq(0, 18, 1)) +
+  scale_y_continuous(breaks = seq(68, 82, 1)) +
+  geom_smooth(method = "lm", alpha = .5) +
+  ggtitle("GIR vs Scoring: Line of Best Fit") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+### The effect of Putts per round on Scoring
+A **strong positive** relationship exists between Putts and Score. This agrees with intuitition, since a worse putting stat (more putts per round) is associated with higher scoring patterns. It is clear that a combination of maximising GIR and minimising Putts per round will lead to a decrease in Scoring.
+
+```{r fig9, fig.height = 5, fig.width = 8, fig.align = "center", echo = FALSE, message = FALSE}
+p <- ggplot(stats, aes(Putts, Gross))
+p + geom_point(colour = "black", size = 3) +
+  scale_x_continuous(breaks = seq(20, 42, 1)) +
+  scale_y_continuous(breaks = seq(68, 82, 1)) +
+  geom_smooth(method = "lm", alpha = .5) +
+  ggtitle("Putts vs Scoring: Line of Best Fit") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+### Multiple Linear Regression
+In order to substantiate the claims made above, a *multiple linear regression* is conducted. GIR and Putts per round are regressed on Gross Score in order to evaluate the statistical significance of the predictor variables on the response: Gross Score.
+
+Since the *p-value is less than 0.05 for GIR and Putts*, it is concluded that both GIR and Putts per round are **statistitically significant** in predicting Gross score. They both have considerable predictive power for the response variable, and should therefore be included in the multiple linear regression model.
+
+```{r, include = FALSE}
+stats$`Front 9` <- as.numeric(stats$`Front 9`)
+stats$`Back 9` <- as.numeric(stats$`Back 9`)
+```
+
+```{r, include = FALSE}
+
+model1 <- lm(Gross ~ GIR + Putts, data = stats) 
+summary(model1)   
+```
+
+```{r, echo = FALSE, warning = FALSE}
+library(broom)
+library(pander)
+table_obj <- tidy(model1)      
+pander(table_obj, digits = 3)   
+```
+ 
+### Interpretation of Model
+
+The multiple linear regression model takes the following form:
+$$f(X) = \beta_0 + \beta_1X_1 + \beta_2X_2$$
+Where $f(X)$ is the response variable Gross Score and $X_i$ refers to the predictor variables: $X_1$: GIR & $X_2$: Putts.  
+$\beta_i$ refers to the coefficient of the predictor variables: $\beta_1$: GIR & $\beta_2$: Putts.  
+
+Using the coefficients determined by the model, the following relationship between predictor and response variables are established:
+
+$$ Gross Score = 59.8 - 0.822*GIR + 0.787*Putts$$
+
+The following example illustrates the above equation in practice.
+Suppose you hit 12 GIR and have 26 putts for your round, your expected Gross Score is calculated as follows:
+$$ Gross Score = 59.8 - 0.822*12 + 0.787*26$$
+$$ Gross Score = 70.398$$
+
+```{r, include = FALSE}
+to_par <- c(sum(stats$`1`), sum(stats$`2`), sum(stats$`3`), 
+       sum(stats$`4`), sum(stats$`5`), sum(stats$`6`), sum(stats$`7`),
+       sum(stats$`8`), sum(stats$`9`), sum(stats$`10`), sum(stats$`11`),
+       sum(stats$`12`), sum(stats$`13`), sum(stats$`14`), sum(stats$`15`),
+       sum(stats$`16`), sum(stats$`17`), sum(stats$`18`))
+to_par
+
+average_hole <- c(mean(stats$`1`), mean(stats$`2`), mean(stats$`3`), 
+                  mean(stats$`4`), mean(stats$`5`), mean(stats$`6`), 
+                  mean(stats$`7`), mean(stats$`8`), mean(stats$`9`), 
+                  mean(stats$`10`), mean(stats$`11`), mean(stats$`12`),
+                  mean(stats$`13`), mean(stats$`14`), mean(stats$`15`),
+                  mean(stats$`16`), mean(stats$`17`), mean(stats$`18`))
+average_hole <- round(average_hole, 3)
+
+ecclectic <- c(min(stats$`1`), min(stats$`2`), min(stats$`3`), 
+               min(stats$`4`), min(stats$`5`), min(stats$`6`), min(stats$`7`),
+               min(stats$`8`), min(stats$`9`), min(stats$`10`), min(stats$`11`),
+               min(stats$`12`), min(stats$`13`), min(stats$`14`), min(stats$`15`),
+               min(stats$`16`), min(stats$`17`), min(stats$`18`))
+ecclectic
+```
+
+```{r, include = FALSE}
+hole <- (1:18)
+hole
+```
+
+```{r, include = FALSE}
+stroke_rating <- as.data.frame(cbind(hole, to_par))
+stroke_rating <- as.data.frame(cbind(stroke_rating, average_hole))
+stroke_rating <- as.data.frame(cbind(stroke_rating, ecclectic))
+stroke_rating
+```
+
+### Scoring Skyline
+This graph is coloured according to cumulative score to par in all recorded rounds.
+
+```{r fig10, fig.height = 7, fig.width = 10, fig.align = "center", echo = FALSE}
+p <- ggplot(stroke_rating, aes(x = hole, y = to_par, fill = to_par)) +
+  geom_bar(stat = "identity") + theme_minimal() + 
+  scale_fill_gradient(low = "green", high = "red") +
+  scale_x_discrete(limits = c(1:18)) +
+  ggtitle("Scoring relative to par by hole") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylab("Relative to par") + xlab("Hole") +
+  scale_y_continuous(breaks = seq(-10, 20, 1)) 
+p 
+```
+
+The following table summarises the effective stroke rating of each hole based on the cumulative score to par for all recorded rounds.
+
+```{r, include = FALSE}
+library(broom)
+library(pander)
+stroke_rating <- as.data.frame(cbind(hole, to_par))
+stroke_rating <- as.data.frame(cbind(stroke_rating, average_hole))
+stroke_rating <- as.data.frame(cbind(stroke_rating, ecclectic))
+pander(stroke_rating, digits = 3) 
+```
+
+
+```{r, include = FALSE}
+stroke_rating <- stroke_rating[order(stroke_rating$to_par),]
+stroke_rating
+stroke <- (18:1)
+stroke
+stroke_rating <- cbind(stroke,stroke_rating)
+row.names(stroke_rating) <- NULL
+stroke_rating
+# Ecclectic score
+sum(ecclectic) + 72
+```
+
+```{r, echo = FALSE, warning = FALSE}
+library(broom)
+library(pander)
+pander(stroke_rating, digits = 3) 
+```
+
+### Box and whisker plots of Front9/Back9/Putts/Gross/GIR
+```{r fig11, fig.height = 3, fig.width = 7, fig.align = "center", echo = FALSE}
+par(mfrow = c(1,1))
+boxplot(stats$`Front 9`, col = "magenta", horizontal = T, 
+        main = "Front 9 ")
+boxplot(stats$`Back 9`, col = "magenta", horizontal = T, 
+        main = "Back 9 ")
+boxplot(stats$Putts, col = "magenta", horizontal = T, 
+        main = "Putts")
+boxplot(stats$Gross, col = "magenta", horizontal = T, 
+        main = "Gross")
+boxplot(stats$GIR, col = "magenta", horizontal = T, 
+        main = "GIR")
+```
